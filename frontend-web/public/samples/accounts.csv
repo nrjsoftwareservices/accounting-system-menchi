@@ -1,0 +1,8 @@
+code,name,type,parent_code
+1000,Cash,asset,
+1010,Petty Cash,asset,1000
+1100,Accounts Receivable,asset,
+2000,Accounts Payable,liability,
+3000,Owner's Equity,equity,
+4000,Sales Revenue,revenue,
+5000,Cost of Goods Sold,expense,
