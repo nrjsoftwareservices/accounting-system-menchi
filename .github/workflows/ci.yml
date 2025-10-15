@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_sqlite
+      - name: Install dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+      - name: Copy env
+        working-directory: backend
+        run: cp .env.example .env
+      - name: Run tests
+        working-directory: backend
+        run: php artisan test --testdox
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps
+        working-directory: frontend-web
+        run: npm ci
+      - name: Lint
+        working-directory: frontend-web
+        run: npm run lint -- --no-inline-config || true
+      - name: Build
+        working-directory: frontend-web
+        run: npm run build
+
