@@ -42,14 +42,7 @@ export default function ImportsPage() {
           <input type="file" accept=".csv,text/csv" onChange={(e)=>upload('/imports/accounts', e.target.files?.[0]||null)} />
         </div>
         <div className="border rounded p-3">
-          <h2 className="font-medium mb-2">Journals</h2>
-          <p className="text-xs text-gray-600 mb-2">Two formats supported:</p>
-          <ul className="list-disc pl-5 text-xs text-gray-700 mb-2">
-            <li>Generic: entry_date, reference, account_code, debit, credit, description</li>
-            <li>Sales format: Date, CLIENT, TIN NO., Address, INVOICE NUMBER, GROSS AMOUNT, OUTPUT TAX, NET OF VAT, VAT Exempt SC/PWD, VAT Exempt Others, Discount, DESCRIPTION, ACCOUNT TITLE</li>
-          </ul>
-          <a className="text-sm text-teal-700 underline mr-3" href="/samples/journals.csv" download>Download generic sample</a>
-          <a className="text-sm text-teal-700 underline mr-3" href="/samples/sales_journals.csv" download>Download sales sample</a>
+          <h2 className="font-medium mb-2">Sales</h2>
           <a className="text-sm text-teal-700 underline" href="/samples/Sales-2025.csv" download>Download sales sample (your format name)</a>
           <p className="text-xs text-gray-600 mt-2">Account mappings are taken from the selected Client settings. Manage at <a className="underline" href="/clients">Clients</a>.</p>
           <p className="text-xs text-gray-600 mt-1">Optional override columns (when present in the CSV) take precedence per row: <code>AR ACCOUNT CODE</code>, <code>VAT PAYABLE ACCOUNT CODE</code>, <code>SALES GOODS ACCOUNT CODE</code>, <code>SALES SERVICES ACCOUNT CODE</code>, <code>SALES EXEMPT ACCOUNT CODE</code>, <code>SALES DISCOUNT ACCOUNT CODE</code>.</p>
@@ -60,16 +53,9 @@ export default function ImportsPage() {
 
         <div className="border rounded p-3">
           <h2 className="font-medium mb-2">Purchases & Expenses</h2>
-          <p className="text-xs text-gray-600 mb-2">
-            CSV header supported: <b>Date, SUPPLIER, TIN NO., Address, INVOICE NUMBER, GROSS AMOUNT, INPUT TAX, NET OF VAT, NON VAT, ACCOUNT TITLE</b>.
-            Top banner rows are ignored.
-          </p>
           <div className="mb-2">
-            <a className="text-sm text-teal-700 underline mr-3" href="/samples/purchases_expenses.csv" download>
-              Download purchases & expenses sample
-            </a>
             <a className="text-sm text-teal-700 underline" href="/samples/P AND E CSV.csv" download>
-              Download purchases & expenses sample (your format name)
+              Download purchases & expenses sample
             </a>
           </div>
           <p className="text-xs text-gray-600 mb-2">Account mappings are taken from the selected Client settings. Manage at <a className="underline" href="/clients">Clients</a>. Optional override columns: <code>CREDIT ACCOUNT CODE</code>, <code>CASH ACCOUNT CODE</code>, <code>INPUT VAT ACCOUNT CODE</code>, <code>EXPENSE VATABLE ACCOUNT CODE</code>, <code>EXPENSE NON VAT ACCOUNT CODE</code>, <code>DEFAULT EXPENSE ACCOUNT CODE</code>.</p>

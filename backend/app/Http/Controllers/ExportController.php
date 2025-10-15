@@ -37,12 +37,14 @@ class ExportController extends Controller
         $dir = strtolower($request->query('dir')) === 'desc' ? 'desc' : 'asc';
 
         return $this->streamCsv('accounts.csv', function ($out) use ($org, $sort, $dir) {
-            fputcsv($out, ['Code','Name','Type']);
-            Account::where('organization_id', $org->id)
+            fputcsv($out, ['Code','Name','Type','Parent Code']);
+            Account::with('parent')
+                ->where('organization_id', $org->id)
                 ->orderBy($sort, $dir)
                 ->chunkById(1000, function ($chunk) use ($out) {
                     foreach ($chunk as $a) {
-                        fputcsv($out, [$a->code, $a->name, $a->type]);
+                        $parentCode = optional($a->parent)->code;
+                        fputcsv($out, [$a->code, $a->name, $a->type, $parentCode]);
                     }
                     flush();
                 });

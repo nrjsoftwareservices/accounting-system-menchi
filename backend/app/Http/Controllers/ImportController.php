@@ -18,25 +18,39 @@ class ImportController extends Controller
         $handle = fopen($path, 'r');
         if (!$handle) return response()->json(['message' => 'Unable to read file'], 400);
 
+        // Read and normalize header (strip BOM, spaces, punctuation)
         $header = fgetcsv($handle);
-        $cols = array_map('strtolower', $header ?: []);
+        $normalize = function(string $s) {
+            // Remove UTF-8 BOM if present
+            $s = preg_replace('/^\xEF\xBB\xBF/', '', $s);
+            $s = strtolower(trim($s));
+            $s = preg_replace('/[^a-z0-9]+/', '_', $s);
+            return trim($s, '_');
+        };
+        $cols = array_map($normalize, $header ?: []);
         // Expected columns: code,name,type,parent_code
         $count = 0; $errors = [];
         DB::beginTransaction();
         try {
             while (($row = fgetcsv($handle)) !== false) {
-                $data = array_combine($cols, $row);
+                $data = array_combine($cols, array_pad($row, count($cols), null));
                 if (!$data) continue;
+                $code = (string)($data['code'] ?? '');
+                $name = (string)($data['name'] ?? '');
+                $type = (string)($data['type'] ?? '');
+                $parentCode = (string)($data['parent_code'] ?? '');
+                if ($code === '' || $name === '' || $type === '') { continue; }
+
                 $parentId = null;
-                if (!empty($data['parent_code'])) {
-                    $parent = Account::where('organization_id', $org->id)->where('code',$data['parent_code'])->first();
+                if ($parentCode !== '') {
+                    $parent = Account::where('organization_id', $org->id)->where('code', $parentCode)->first();
                     $parentId = $parent?->id;
                 }
                 Account::updateOrCreate(
-                    ['organization_id' => $org->id, 'code' => $data['code']],
+                    ['organization_id' => $org->id, 'code' => $code],
                     [
-                        'name' => $data['name'],
-                        'type' => $data['type'],
+                        'name' => $name,
+                        'type' => $type,
                         'parent_id' => $parentId,
                         'level' => $parentId ? 2 : 1,
                         'is_active' => true,
