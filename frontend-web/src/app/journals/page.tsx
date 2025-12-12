@@ -18,7 +18,7 @@ export default function JournalsPage() {
   const [total, setTotal] = useState(0);
   const [perPage, setPerPage] = useState(20);
   const [error, setError] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<Record<string,string[]>>({});
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<{ entry_date?: string; reference?: string; lines: Line[] }>({ lines: [{},{}] });
 
   const totals = useMemo(() => {
@@ -61,16 +61,40 @@ export default function JournalsPage() {
   const addLine = () => setForm(prev => ({...prev, lines: [...prev.lines, {}]}));
   const removeLine = (i:number) => setForm(prev => ({...prev, lines: prev.lines.filter((_,idx)=>idx!==i)}));
 
-  const create = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setForm({ entry_date: undefined, reference: undefined, lines: [{}, {}] });
+    setEditingId(null);
+  };
+
+  const startEdit = (entry: any) => {
+    const lines = (entry.lines || []).map((line: any) => ({
+      account_id: line.account_id,
+      description: line.description || "",
+      debit: Number(line.debit || 0),
+      credit: Number(line.credit || 0),
+    }));
+    setForm({
+      entry_date: entry.entry_date || "",
+      reference: entry.reference || "",
+      lines: lines.length > 0 ? lines : [{}, {}],
+    });
+    setEditingId(entry.id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setError(null);
     if (!totals.balanced) { setError('Debits and credits must balance and be > 0'); return; }
     try {
-      await api('/journals', { method:'POST', body: JSON.stringify(form) });
-      setForm({ lines: [{},{}] });
-      setFormErrors({});
+      if (editingId) {
+        await api(`/journals/${editingId}`, { method: 'PUT', body: JSON.stringify(form) });
+      } else {
+        await api('/journals', { method:'POST', body: JSON.stringify(form) });
+      }
+      resetForm();
       load();
     } catch (err:any) {
-      setError(err.message || 'Failed'); setFormErrors(err.errors||{});
+      setError(err.message || 'Failed');
     }
   };
 
@@ -79,8 +103,15 @@ export default function JournalsPage() {
       <h1 className="text-xl font-semibold">Journal Entries</h1>
 
       <section className="border rounded-lg p-3">
-        <h2 className="font-medium mb-3">New Entry</h2>
-        <form onSubmit={create} className="space-y-3">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-medium">{editingId ? `Edit Entry #${editingId}` : "New Entry"}</h2>
+          {editingId && (
+            <button type="button" className="text-sm text-blue-700 underline" onClick={resetForm}>
+              Cancel edit
+            </button>
+          )}
+        </div>
+        <form onSubmit={submit} className="space-y-3">
           <div className="flex gap-3">
             <div className="flex-1">
               <Label htmlFor="entry_date">Date</Label>
@@ -131,7 +162,7 @@ export default function JournalsPage() {
             )}
           </div>
           {error && <div className="text-sm text-red-700">{error}</div>}
-          <Button type="submit" disabled={!totals.balanced}>Create Entry</Button>
+          <Button type="submit" disabled={!totals.balanced}>{editingId ? 'Save Changes' : 'Create Entry'}</Button>
         </form>
       </section>
 
@@ -141,7 +172,7 @@ export default function JournalsPage() {
           <div className="text-sm">Total: {total}</div>
         </div>
         <table className="w-full border text-sm">
-          <thead><tr className="bg-gray-50"><th className="p-2 border">Date</th><th className="p-2 border">Reference</th><th className="p-2 border">Lines</th><th className="p-2 border text-right">Debit</th><th className="p-2 border text-right">Credit</th></tr></thead>
+          <thead><tr className="bg-gray-50"><th className="p-2 border">Date</th><th className="p-2 border">Reference</th><th className="p-2 border">Lines</th><th className="p-2 border text-right">Debit</th><th className="p-2 border text-right">Credit</th><th className="p-2 border text-right">Actions</th></tr></thead>
           <tbody>
             {list.map((j:any)=>{
               const dsum = (j.lines||[]).reduce((s:any,l:any)=>s+Number(l.debit||0),0);
@@ -153,6 +184,11 @@ export default function JournalsPage() {
                   <td className="p-2 border">{(j.lines||[]).length}</td>
                   <td className="p-2 border text-right">{dsum.toFixed(2)}</td>
                   <td className="p-2 border text-right">{csum.toFixed(2)}</td>
+                  <td className="p-2 border text-right">
+                    <button type="button" className="text-xs text-blue-700 underline" onClick={()=>startEdit(j)}>
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               );
             })}
@@ -181,4 +217,3 @@ function Pagination({ page, lastPage, total, onChange }: { page: number; lastPag
 }
 
 function round2(n: number) { return Math.round((Number(n)||0) * 100) / 100; }
-

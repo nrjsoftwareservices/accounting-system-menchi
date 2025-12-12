@@ -27,7 +27,7 @@ export default function LoginPage() {
         localStorage.setItem("token", res.token);
         const orgId = res.organizations?.[0]?.id;
         if (orgId) localStorage.setItem("org_id", String(orgId));
-        router.push("/trial-balance");
+        router.push("/");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Login failed";
         setError(message);

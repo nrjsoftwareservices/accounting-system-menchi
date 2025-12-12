@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -31,11 +31,19 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        // Set the current team/org id so role assignment writes organization_id
-        \setPermissionsTeamId($org->id);
+        $teamColumn = config('permission.column_names.team_foreign_key', 'organization_id');
+        $modelHasRolesTable = config('permission.table_names.model_has_roles', 'model_has_roles');
+        $supportsTeams = Schema::hasColumn($modelHasRolesTable, $teamColumn);
+        if ($supportsTeams) {
+            \setPermissionsTeamId($org->id);
+        }
 
         // Create or fetch the admin role
-        $role = Role::firstOrCreate(['name' => 'admin']);
+        $roleAttributes = ['name' => 'admin', 'guard_name' => config('auth.defaults.guard')];
+        if ($supportsTeams) {
+            $roleAttributes[$teamColumn] = $org->id;
+        }
+        $role = Role::firstOrCreate($roleAttributes);
 
         // Grant the role all existing permissions
         $allPermissions = Permission::pluck('name')->all();
@@ -52,7 +60,7 @@ class AdminUserSeeder extends Seeder
             ['email' => $email],
             [
                 'name' => $name,
-                'password' => Hash::make($password),
+                'password' => $password,
             ]
         );
 

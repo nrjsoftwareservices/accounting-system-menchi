@@ -43,7 +43,7 @@ export default function ImportsPage() {
         </div>
         <div className="border rounded p-3">
           <h2 className="font-medium mb-2">Sales</h2>
-          <a className="text-sm text-teal-700 underline" href="/samples/Sales-2025.csv" download>Download sales sample (your format name)</a>
+          <a className="text-sm text-teal-700 underline" href="/samples/Sales-2025.csv" download>Download sales sample</a>
           <p className="text-xs text-gray-600 mt-2">Account mappings are taken from the selected Client settings. Manage at <a className="underline" href="/clients">Clients</a>.</p>
           <p className="text-xs text-gray-600 mt-1">Optional override columns (when present in the CSV) take precedence per row: <code>AR ACCOUNT CODE</code>, <code>VAT PAYABLE ACCOUNT CODE</code>, <code>SALES GOODS ACCOUNT CODE</code>, <code>SALES SERVICES ACCOUNT CODE</code>, <code>SALES EXEMPT ACCOUNT CODE</code>, <code>SALES DISCOUNT ACCOUNT CODE</code>.</p>
           <div className="mt-2">

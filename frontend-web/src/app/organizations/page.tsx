@@ -218,7 +218,7 @@ function Pagination({ page, lastPage, total, onChange }: { page: number; lastPag
 }
 
 function EditOrgModal({ value, onClose, onSaved }: { value: Org, onClose: ()=>void, onSaved: ()=>void }) {
-  const [form, setForm] = useState<Partial<Org>>({ name: value.name, code: value.code, default_currency: value.default_currency || 'USD' });
+  const [form, setForm] = useState<Partial<Org>>({ name: value.name, code: value.code, default_currency: value.default_currency || 'PHP' });
   const [errors, setErrors] = useState<Record<string,string[]>>({});
   const [saving, setSaving] = useState(false);
   const save = async (e: React.FormEvent) => {

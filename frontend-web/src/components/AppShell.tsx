@@ -13,13 +13,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const isAuth = pathname === "/login";
   // Hooks must not be conditional; declare consistently
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  if (isAuth) {
-    // Minimal layout on auth routes; hooks order remains stable
-    return <>{children}</>;
-  }
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="border-b bg-card">
+      <div className={`${isAuth ? "hidden" : "border-b bg-card"}`}>
         <div className="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
@@ -39,10 +35,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </div>
-      <div className="max-w-5xl mx-auto flex flex-1 w-full">
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <main className="flex-1 p-4">
-          <Breadcrumbs />
+      <div
+        className={`mx-auto flex flex-1 w-full ${isAuth ? "max-w-xl items-center justify-center p-6" : "max-w-5xl"}`}
+      >
+        <div className={isAuth ? "hidden" : ""}>
+          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        </div>
+        <main className={`flex-1 ${isAuth ? "" : "p-4"}`}>
+          <div className={isAuth ? "hidden" : ""}>
+            <Breadcrumbs />
+          </div>
           {children}
         </main>
       </div>

@@ -26,14 +26,14 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => $data['password'],
         ]);
 
         $org = Organization::create([
             'uuid' => (string) Str::uuid(),
             'name' => $data['organization']['name'],
             'code' => $data['organization']['code'],
-            'default_currency' => $data['organization']['default_currency'] ?? 'USD',
+            'default_currency' => $data['organization']['default_currency'] ?? 'PHP',
         ]);
 
         $org->users()->attach($user->id, ['role' => 'admin']);
@@ -63,4 +63,3 @@ class AuthController extends Controller
         return response()->json(['token' => $token, 'user' => $user, 'organizations' => $orgs]);
     }
 }
-

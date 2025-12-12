@@ -6,7 +6,6 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
 
 class OrganizationController extends Controller
 {
@@ -103,7 +102,7 @@ class OrganizationController extends Controller
             $invitee = User::create([
                 'name' => strstr($data['email'], '@', true) ?: $data['email'],
                 'email' => $data['email'],
-                'password' => Hash::make(Str::random(16)),
+                'password' => Str::random(16),
             ]);
         }
         $org->users()->syncWithoutDetaching([$invitee->id => ['role' => $data['role']]]);

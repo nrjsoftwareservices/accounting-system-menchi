@@ -8,6 +8,7 @@ use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\TaxController;
+use App\Http\Controllers\DashboardController;
 
 Route::prefix('v1')->group(function () {
     // Registration is disabled; only admins can create users via admin endpoints
@@ -36,6 +37,7 @@ Route::prefix('v1')->group(function () {
         // Journals: read manager+, write accountant+
         Route::get('/journals', [JournalEntryController::class, 'index'])->middleware('org.role:manager');
         Route::post('/journals', [JournalEntryController::class, 'store'])->middleware('org.role:accountant');
+        Route::put('/journals/{id}', [JournalEntryController::class, 'update'])->middleware('org.role:accountant');
 
         // AR/AP modules are hidden; comment routes out to disable endpoints
         // Route::get('/ar/invoices', [...]);
@@ -93,5 +95,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/reports/contacts', [ReportController::class, 'contacts'])->middleware('org.role:manager');
         Route::get('/exports/contacts/customers', [ExportController::class, 'contactsCustomers'])->middleware('org.role:manager');
         Route::get('/exports/contacts/suppliers', [ExportController::class, 'contactsSuppliers'])->middleware('org.role:manager');
+
+        // Dashboard overview
+        Route::get('/dashboard/summary', [DashboardController::class, 'summary'])->middleware('org.role:auditor');
     });
 });

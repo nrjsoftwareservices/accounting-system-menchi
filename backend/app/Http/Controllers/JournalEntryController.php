@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
 use App\Models\JournalEntry;
-use App\Models\JournalLine;
 use Illuminate\Http\Request;
 use App\Http\Requests\JournalStoreRequest;
 
@@ -24,5 +22,13 @@ class JournalEntryController extends Controller
         $org = $request->attributes->get('organization');
         $entry = $this->repo->createPosted($org?->id ?? $request->integer('organization_id'), $request->validated());
         return response()->json($entry, 201);
+    }
+
+    public function update(JournalStoreRequest $request, int $id)
+    {
+        $org = $request->attributes->get('organization');
+        $entry = JournalEntry::where('organization_id', $org->id)->findOrFail($id);
+        $updated = $this->repo->updateEntry($entry, $request->validated());
+        return response()->json($updated);
     }
 }

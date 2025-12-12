@@ -40,5 +40,34 @@ class JournalRepository
             return $entry->load('lines');
         });
     }
-}
 
+    public function updateEntry(JournalEntry $entry, array $data): JournalEntry
+    {
+        return DB::transaction(function () use ($entry, $data) {
+            $entry->update([
+                'entry_date' => $data['entry_date'],
+                'reference' => $data['reference'] ?? null,
+                'currency' => $data['currency'] ?? 'USD',
+                'exchange_rate' => $data['exchange_rate'] ?? 1,
+                'source' => $data['source'] ?? 'manual',
+                'description' => $data['description'] ?? null,
+                'is_posted' => true,
+            ]);
+
+            $entry->lines()->delete();
+            foreach ($data['lines'] as $i => $line) {
+                JournalLine::create([
+                    'journal_entry_id' => $entry->id,
+                    'organization_id' => $entry->organization_id,
+                    'account_id' => $line['account_id'],
+                    'debit' => (float)($line['debit'] ?? 0),
+                    'credit' => (float)($line['credit'] ?? 0),
+                    'description' => $line['description'] ?? null,
+                    'line_no' => $i + 1,
+                ]);
+            }
+
+            return $entry->refresh()->load('lines');
+        });
+    }
+}
